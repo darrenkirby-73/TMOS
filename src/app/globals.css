@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f5f5f7;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --foreground: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #aeaeb2;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --accent: #0d9488; /* validated for chart use on both light and dark surfaces */
+  --accent-soft: rgba(13, 148, 136, 0.1);
+  --accent-foreground: #ffffff;
+  --positive: #16a34a;
+  --negative: #dc2626;
+}
+
+.dark {
+  --background: #0f0f10;
+  --surface: #1c1c1e;
+  --surface-raised: #2c2c2e;
+  --foreground: #f5f5f7;
+  --muted: #98989d;
+  --faint: #636366;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --accent: #0d9488;
+  --accent-soft: rgba(13, 148, 136, 0.18);
+  --accent-foreground: #ffffff;
+  --positive: #4ade80;
+  --negative: #f87171;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-border-subtle: var(--border-subtle);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-card: 1rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Card surface used throughout the app */
+@utility card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Large metric numbers always align in columns */
+@utility metric {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
