@@ -21,6 +21,9 @@
   --chart-positive: #16a34a;
   --chart-negative: #dc2626;
   --chart-grid: rgba(0, 0, 0, 0.08);
+  /* Fixed categorical order for multi-series charts, never cycled. */
+  --series-1: #0d9488;
+  --series-2: #b45309;
 }
 
 .dark {
@@ -39,6 +42,8 @@
   --chart-positive: #16a34a;
   --chart-negative: #ef4444;
   --chart-grid: rgba(255, 255, 255, 0.1);
+  --series-1: #0d9488;
+  --series-2: #b45309;
 }
 
 @theme inline {
@@ -56,6 +61,8 @@
   --color-negative: var(--negative);
   --color-chart-positive: var(--chart-positive);
   --color-chart-negative: var(--chart-negative);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
   --font-sans:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
