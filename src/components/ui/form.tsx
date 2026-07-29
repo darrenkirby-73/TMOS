@@ -63,6 +63,32 @@ export function CheckboxField({
   );
 }
 
+/**
+ * Renders "suggested <value> use" next to a field label. Applying a
+ * suggestion is always an explicit click — suggestions never overwrite
+ * what the user typed.
+ */
+export function SuggestionHint({
+  value,
+  onApply,
+  applied,
+}: {
+  value: string | number | null;
+  onApply: () => void;
+  applied: boolean;
+}) {
+  if (value === null || value === "") return null;
+  if (applied) return <>matches trade log</>;
+  return (
+    <>
+      suggested {value}{" "}
+      <button type="button" onClick={onApply} className="text-accent underline">
+        use
+      </button>
+    </>
+  );
+}
+
 /** 0–10 scale input rendered as a range slider with a visible value. */
 export function ScaleField({
   label,

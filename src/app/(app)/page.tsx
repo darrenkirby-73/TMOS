@@ -100,6 +100,7 @@ export default async function DashboardPage() {
           <StatusPill
             done={Boolean(today?.evening_completed_at)}
             label="Evening check-in"
+            href="/evening"
           />
         </div>
       </section>
