@@ -1,152 +1,174 @@
-import { ScoreTile } from "@/components/score-tile";
-import {
-  WeeklyScoreChart,
-  type WeeklyScore,
-} from "@/components/weekly-score-chart";
+import Link from "next/link";
+import { LoadError, SetupNotice } from "@/components/setup-notice";
+import { todayIso } from "@/lib/dates";
 import { isSupabaseConfigured } from "@/lib/env";
+import { formatR } from "@/lib/r";
+import { computeRStats } from "@/lib/stats";
 import { createClient } from "@/lib/supabase/server";
-
-const PILLARS = [
-  { key: "risk_score", label: "Risk" },
-  { key: "stress_score", label: "Stress" },
-  { key: "attitude_score", label: "Attitude" },
-  { key: "discipline_score", label: "Discipline" },
-  { key: "process_score", label: "Decision process" },
-] as const;
-
-type Checkin = Record<(typeof PILLARS)[number]["key"], number>;
-
-// Clearly-marked sample data shown until Supabase is connected, so the
-// dashboard demonstrates the intended layout on first run.
-const SAMPLE_WEEKS: WeeklyScore[] = [
-  { week: "May 25", score: 5.4 },
-  { week: "Jun 1", score: 6.1 },
-  { week: "Jun 8", score: 5.8 },
-  { week: "Jun 15", score: 6.6 },
-  { week: "Jun 22", score: 7.0 },
-  { week: "Jun 29", score: 6.8 },
-];
-
-function weekLabel(isoDate: string) {
-  return new Date(`${isoDate}T00:00:00`).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-}
+import type { DayRecord, Trade } from "@/lib/types";
 
 async function loadData(): Promise<{
-  checkin: Checkin | null;
-  weeks: WeeklyScore[] | null;
+  today: DayRecord | null;
+  trades: Trade[];
   error: string | null;
 }> {
   const supabase = await createClient();
-  const today = new Date().toISOString().slice(0, 10);
-
-  const [checkinRes, weeksRes] = await Promise.all([
+  const [dayRes, tradesRes] = await Promise.all([
     supabase
-      .from("daily_checkins")
-      .select(PILLARS.map((p) => p.key).join(","))
-      .eq("checkin_date", today)
-      .maybeSingle<Checkin>(),
+      .from("day_records")
+      .select("*")
+      .eq("date", todayIso())
+      .maybeSingle(),
     supabase
-      .from("weekly_checkin_averages")
-      .select("week_start, composite_avg")
-      .order("week_start", { ascending: true })
-      .limit(8),
+      .from("trades")
+      .select("*")
+      .order("date", { ascending: false })
+      .order("created_at", { ascending: false }),
   ]);
-
-  if (checkinRes.error || weeksRes.error) {
-    return {
-      checkin: null,
-      weeks: null,
-      error:
-        checkinRes.error?.message ??
-        weeksRes.error?.message ??
-        "Unknown error",
-    };
-  }
-
   return {
-    checkin: checkinRes.data,
-    weeks: (weeksRes.data ?? []).map((w) => ({
-      week: weekLabel(w.week_start as string),
-      score: Number(w.composite_avg),
-    })),
-    error: null,
+    today: (dayRes.data as DayRecord) ?? null,
+    trades: (tradesRes.data as Trade[]) ?? [],
+    error: dayRes.error?.message ?? tradesRes.error?.message ?? null,
   };
+}
+
+function StatusPill({ done, label }: { done: boolean; label: string }) {
+  return (
+    <span
+      className={`rounded-full px-3 py-1 text-xs font-medium ${
+        done ? "bg-accent-soft text-accent" : "bg-background text-muted"
+      }`}
+    >
+      {label} {done ? "✓" : "·"}
+    </span>
+  );
 }
 
 export default async function DashboardPage() {
   const configured = isSupabaseConfigured;
-  const { checkin, weeks, error } = configured
+  const { today, trades, error } = configured
     ? await loadData()
-    : { checkin: null, weeks: null, error: null };
+    : { today: null, trades: [], error: null };
+
+  const closed = trades.filter(
+    (t) => t.status === "closed" && t.r_result !== null,
+  );
+  const stats = computeRStats(closed.map((t) => t.r_result as number));
+  const openTrades = trades.filter((t) => t.status === "open");
+  const recent = trades.slice(0, 5);
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="mt-1 text-sm text-muted">
-          Today&apos;s mental state and your weekly trend.
+          Process first: check in, follow the plan, log everything in R.
         </p>
       </div>
 
-      {!configured ? (
-        <div className="card border-accent/30 p-5 text-sm">
-          <p className="font-medium">Connect Supabase to get started</p>
-          <p className="mt-1 text-muted">
-            Copy <code>.env.example</code> to <code>.env.local</code>, fill in
-            your project URL and anon key, then apply the migration in{" "}
-            <code>supabase/migrations/</code>. Sample data is shown below.
-          </p>
-        </div>
-      ) : null}
+      {!configured ? <SetupNotice /> : null}
+      {error ? <LoadError message={error} /> : null}
 
-      {error ? (
-        <div className="card p-5 text-sm">
-          <p className="font-medium">Couldn&apos;t load data</p>
-          <p className="mt-1 text-muted">
-            {error} — if the tables don&apos;t exist yet, apply the migration
-            in <code>supabase/migrations/</code>.
+      {/* Today */}
+      <section className="card flex flex-wrap items-center justify-between gap-3 p-5">
+        <div>
+          <h2 className="text-base font-semibold">Today</h2>
+          <p className="mt-0.5 text-sm text-muted">
+            {today?.traded ? "Traded" : "No trades recorded"} ·{" "}
+            {openTrades.length} open position
+            {openTrades.length === 1 ? "" : "s"}
           </p>
         </div>
-      ) : null}
-
-      <section aria-label="Today's check-in">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {PILLARS.map((p) => (
-            <ScoreTile
-              key={p.key}
-              label={p.label}
-              value={checkin ? checkin[p.key] : null}
-            />
-          ))}
+        <div className="flex flex-wrap gap-2">
+          <StatusPill
+            done={Boolean(today?.morning_completed_at)}
+            label="Morning check-in"
+          />
+          <StatusPill
+            done={Boolean(today?.evening_completed_at)}
+            label="Evening check-in"
+          />
         </div>
-        {configured && !checkin && !error ? (
-          <p className="mt-3 text-sm text-muted">
-            No check-in yet today — head to the Journal to log one.
-          </p>
-        ) : null}
       </section>
 
-      <section aria-label="Weekly trend" className="card p-6">
-        <h2 className="text-base font-semibold">
-          Weekly average check-in score
-        </h2>
-        {!configured ? (
-          <p className="mt-0.5 text-xs text-faint">
-            Sample data — connect Supabase to see your own
-          </p>
-        ) : null}
-        <div className="mt-4">
-          {configured && weeks && weeks.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted">
-              No check-ins recorded yet. Your weekly trend will appear here.
-            </p>
-          ) : (
-            <WeeklyScoreChart data={configured ? (weeks ?? []) : SAMPLE_WEEKS} />
-          )}
+      {/* R stats */}
+      <section
+        aria-label="Performance"
+        className="grid grid-cols-2 gap-4 sm:grid-cols-4"
+      >
+        <div className="card p-5">
+          <p className="text-sm text-muted">Closed trades</p>
+          <p className="metric text-3xl font-semibold">{stats.count}</p>
         </div>
+        <div className="card p-5">
+          <p className="text-sm text-muted">Win rate</p>
+          <p className="metric text-3xl font-semibold">
+            {stats.winRate !== null ? `${stats.winRate}%` : "—"}
+          </p>
+        </div>
+        <div className="card p-5">
+          <p className="text-sm text-muted">Expectancy</p>
+          <p className="metric text-3xl font-semibold">
+            {formatR(stats.expectancy)}
+          </p>
+        </div>
+        <div className="card p-5">
+          <p className="text-sm text-muted">Total R</p>
+          <p
+            className={`metric text-3xl font-semibold ${
+              stats.totalR > 0
+                ? "text-positive"
+                : stats.totalR < 0
+                  ? "text-negative"
+                  : ""
+            }`}
+          >
+            {formatR(stats.totalR)}
+          </p>
+        </div>
+      </section>
+
+      {/* Recent trades */}
+      <section aria-label="Recent trades" className="card p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold">Recent trades</h2>
+          <Link href="/trades" className="text-sm text-accent hover:underline">
+            View all
+          </Link>
+        </div>
+        {recent.length === 0 ? (
+          <p className="mt-4 text-sm text-muted">
+            Nothing logged yet. Your five most recent trades will appear here.
+          </p>
+        ) : (
+          <ul className="mt-3 divide-y divide-border-subtle">
+            {recent.map((t) => (
+              <li
+                key={t.id}
+                className="flex items-center justify-between py-2.5 text-sm"
+              >
+                <span className="flex items-center gap-3">
+                  <span className="metric text-muted">{t.date}</span>
+                  <span className="font-semibold">{t.ticker}</span>
+                  <span className="text-muted">
+                    {t.direction === "long" ? "Long" : "Short"}
+                  </span>
+                </span>
+                <span
+                  className={`metric font-semibold ${
+                    (t.r_result ?? 0) > 0
+                      ? "text-positive"
+                      : (t.r_result ?? 0) < 0
+                        ? "text-negative"
+                        : "text-muted"
+                  }`}
+                >
+                  {t.status === "open" ? "open" : formatR(t.r_result)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
