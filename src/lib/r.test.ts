@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  stopSideError,
   formatR,
   rawPnl,
   stopDistance,
@@ -51,24 +52,22 @@ describe("suggestedR", () => {
     expect(suggestedR({ ...base, exitPrice: 98 })).toBe(-1);
   });
   it("short winner", () => {
-    expect(
-      suggestedR({ ...base, direction: "short", exitPrice: 94 }),
-    ).toBe(3);
+    expect(suggestedR({ ...base, direction: "short", exitPrice: 94 })).toBe(3);
   });
   it("short loser", () => {
-    expect(
-      suggestedR({ ...base, direction: "short", exitPrice: 102 }),
-    ).toBe(-1);
+    expect(suggestedR({ ...base, direction: "short", exitPrice: 102 })).toBe(
+      -1,
+    );
   });
   it("uses risk_amount_gbp as the denominator, not stop distance", () => {
     // User sized risk at £150 even though stop distance implies £100
-    expect(
-      suggestedR({ ...base, riskAmountGbp: 150, exitPrice: 106 }),
-    ).toBe(2);
+    expect(suggestedR({ ...base, riskAmountGbp: 150, exitPrice: 106 })).toBe(2);
   });
   it("null when exit missing or risk invalid", () => {
     expect(suggestedR({ ...base, exitPrice: null })).toBeNull();
-    expect(suggestedR({ ...base, exitPrice: 106, riskAmountGbp: 0 })).toBeNull();
+    expect(
+      suggestedR({ ...base, exitPrice: 106, riskAmountGbp: 0 }),
+    ).toBeNull();
   });
   it("rounds to 2dp", () => {
     expect(suggestedR({ ...base, exitPrice: 100.333 })).toBe(0.17);
@@ -80,5 +79,24 @@ describe("formatR", () => {
     expect(formatR(2.5)).toBe("+2.50R");
     expect(formatR(-0.8)).toBe("-0.80R");
     expect(formatR(null)).toBe("—");
+  });
+});
+
+describe("stopSideError", () => {
+  it("accepts a long stopping below entry and a short above", () => {
+    expect(stopSideError("long", 100, 98)).toBeNull();
+    expect(stopSideError("short", 100, 102)).toBeNull();
+  });
+  it("rejects a stop on the wrong side", () => {
+    expect(stopSideError("long", 100, 102)).toMatch(/below the entry/);
+    expect(stopSideError("short", 100, 98)).toMatch(/above the entry/);
+  });
+  it("rejects a stop equal to entry (zero risk)", () => {
+    expect(stopSideError("long", 100, 100)).not.toBeNull();
+    expect(stopSideError("short", 100, 100)).not.toBeNull();
+  });
+  it("stays silent while inputs are incomplete", () => {
+    expect(stopSideError("long", 0, 98)).toBeNull();
+    expect(stopSideError("long", NaN, 98)).toBeNull();
   });
 });

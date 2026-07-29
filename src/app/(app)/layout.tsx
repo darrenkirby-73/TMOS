@@ -3,35 +3,27 @@ import { Nav } from "@/components/nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ToastProvider } from "@/components/ui/toast";
 import { isSupabaseConfigured } from "@/lib/env";
-import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 
-export default async function AppLayout({
+export default function AppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (isSupabaseConfigured) {
-    // Seed starter tags on first use — a no-op once any tags exist.
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) await supabase.rpc("seed_defaults");
-  }
-
   return (
     <ToastProvider>
       <div className="flex min-h-screen flex-col">
         <header className="sticky top-0 z-10 border-b border-border-subtle bg-background/80 backdrop-blur">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <div className="flex min-w-0 items-center gap-4 sm:gap-6">
-              <Link href="/" className="text-base font-semibold tracking-tight">
-                TMOS
-              </Link>
-              <Nav />
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
+          {/* Nav takes its own full-width row on phones so all destinations
+              stay reachable, and sits inline from sm upwards. */}
+          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6">
+            <Link
+              href="/"
+              className="order-1 text-base font-semibold tracking-tight"
+            >
+              TMOS
+            </Link>
+            <div className="order-2 ml-auto flex shrink-0 items-center gap-2 sm:order-3">
               <ThemeToggle />
               {isSupabaseConfigured ? (
                 <form action={signOut}>
@@ -44,6 +36,7 @@ export default async function AppLayout({
                 </form>
               ) : null}
             </div>
+            <Nav className="order-3 w-full sm:order-2 sm:w-auto" />
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">

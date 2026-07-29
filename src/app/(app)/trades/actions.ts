@@ -61,6 +61,18 @@ function parseTradeForm(form: FormData):
     return { ok: false, error: "Quantity must be a positive number" };
   if (riskAmount === null || riskAmount <= 0)
     return { ok: false, error: "Risk amount (£) must be a positive number" };
+  // R is meaningless if the stop is on the wrong side of the entry: a long
+  // stops out below, a short above.
+  if (direction === "long" && stopPrice >= entryPrice)
+    return {
+      ok: false,
+      error: "A long trade's stop must be below the entry price",
+    };
+  if (direction === "short" && stopPrice <= entryPrice)
+    return {
+      ok: false,
+      error: "A short trade's stop must be above the entry price",
+    };
   if (status === "closed" && exitPrice === null)
     return { ok: false, error: "A closed trade needs an exit price" };
   if (status === "closed" && isComplex && rResult === null)

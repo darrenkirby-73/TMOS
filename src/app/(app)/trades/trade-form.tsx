@@ -10,7 +10,13 @@ import {
   inputClass,
 } from "@/components/ui/form";
 import { useToast } from "@/components/ui/toast";
-import { formatGbp, formatR, suggestedR, suggestedRiskAmount } from "@/lib/r";
+import {
+  formatGbp,
+  formatR,
+  stopSideError,
+  suggestedR,
+  suggestedRiskAmount,
+} from "@/lib/r";
 import { todayIso } from "@/lib/dates";
 import type { Tag, Trade } from "@/lib/types";
 import { DECISION_QUALITIES, TRADE_TYPES } from "@/lib/types";
@@ -69,6 +75,12 @@ export function TradeForm({
   const suggestedRisk = useMemo(
     () => suggestedRiskAmount(Number(entry), Number(stop), Number(qty)),
     [entry, stop, qty],
+  );
+
+  const stopWarning = useMemo(
+    () =>
+      stopSideError(direction as "long" | "short", Number(entry), Number(stop)),
+    [direction, entry, stop],
   );
 
   const rSuggestion = useMemo(() => {
@@ -194,7 +206,14 @@ export function TradeForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Stop price">
+        <Field
+          label="Stop price"
+          hint={
+            stopWarning ? (
+              <span className="text-negative">{stopWarning}</span>
+            ) : undefined
+          }
+        >
           <input
             name="stop_price"
             type="number"

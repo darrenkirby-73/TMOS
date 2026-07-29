@@ -13,11 +13,15 @@ const links = [
   { href: "/coach", label: "Coach" },
 ];
 
-export function Nav() {
+export function Nav({ className = "" }: { className?: string }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center gap-1 overflow-x-auto">
+    <nav
+      // Scrolls horizontally rather than wrapping or clipping — on a phone
+      // this row holds all seven destinations.
+      className={`-mx-1 flex items-center gap-1 overflow-x-auto px-1 ${className}`}
+    >
       {links.map(({ href, label }) => {
         const active =
           href === "/" ? pathname === "/" : pathname.startsWith(href);

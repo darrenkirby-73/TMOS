@@ -18,6 +18,11 @@ export async function signIn(formData: FormData) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
 
+  // Seed the starter tags once per sign-in rather than on every page view.
+  // The function is a no-op as soon as any tags exist, so edits are never
+  // re-seeded; a failure here must not block signing in.
+  await supabase.rpc("seed_defaults");
+
   revalidatePath("/", "layout");
   redirect("/");
 }

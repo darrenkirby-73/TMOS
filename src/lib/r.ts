@@ -14,6 +14,31 @@ export function stopDistance(entryPrice: number, stopPrice: number): number {
 }
 
 /**
+ * A long stops out below its entry and a short above it. Anything else makes
+ * the R calculation meaningless, so the form warns and the server rejects it.
+ * Returns null when the inputs aren't complete enough to judge.
+ */
+export function stopSideError(
+  direction: Direction,
+  entryPrice: number,
+  stopPrice: number,
+): string | null {
+  if (
+    !Number.isFinite(entryPrice) ||
+    !Number.isFinite(stopPrice) ||
+    entryPrice <= 0 ||
+    stopPrice <= 0
+  ) {
+    return null;
+  }
+  if (direction === "long" && stopPrice >= entryPrice)
+    return "A long's stop must be below the entry";
+  if (direction === "short" && stopPrice <= entryPrice)
+    return "A short's stop must be above the entry";
+  return null;
+}
+
+/**
  * Suggested initial risk (1R) in account currency from entry, stop, and
  * quantity. The user reviews this against the risk_amount_gbp they enter.
  */
