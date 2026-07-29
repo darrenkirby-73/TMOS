@@ -34,18 +34,35 @@ can't be verified from your own records, the app asks you to confirm it.
    cp .env.example .env.local
    ```
 
-3. **Apply the database migration.** Paste
-   `supabase/migrations/20260706000001_init.sql` into the Supabase SQL editor,
-   or use the CLI:
+3. **Apply the database migration.** This creates the tables, row-level
+   security policies, weekly summary views, the starter-data function, and
+   the private `trade-screenshots` storage bucket.
+
+   **Via the GitHub integration (recommended if it's connected).** Supabase
+   applies everything in `supabase/migrations/` when changes land on the
+   branch configured under Integrations → GitHub — usually your default
+   branch, so this work needs merging first. `supabase/config.toml` is what
+   makes the repo recognisable as a Supabase project; it must stay at the
+   repo root under `supabase/`.
+
+   **Or with the CLI / SQL editor:**
 
    ```bash
    supabase link --project-ref <your-project-ref>
    supabase db push
    ```
 
-   This creates the tables, row-level security policies, weekly summary
-   views, the starter-data function, and the private `trade-screenshots`
-   storage bucket.
+   > **Check the migration log for one notice.** On hosted Supabase,
+   > `storage.objects` is owned by `supabase_storage_admin`, so depending on
+   > the role applying the migration the storage policies may be skipped with
+   > `Could not create storage policies (must be owner of table objects)`.
+   > Everything else — tables, RLS, views, seeds — still applies; the storage
+   > block is deliberately non-fatal so a permission there can't roll back
+   > your schema. If you see that notice, create a **private** bucket named
+   > `trade-screenshots` under Storage and add four policies (select, insert,
+   > update, delete) with the condition
+   > `bucket_id = 'trade-screenshots' and auth.uid()::text = (storage.foldername(name))[1]`.
+   > Screenshot upload is the only feature affected until you do.
 
 4. **Create your user** in the Supabase dashboard (Authentication → Users →
    Add user). This is a single-user app — there is no sign-up flow.

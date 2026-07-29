@@ -1,0 +1,22 @@
+# Supabase project configuration.
+#
+# This file is what the Supabase GitHub integration looks for to recognise
+# the repository as a Supabase project. Migrations in supabase/migrations/
+# are applied automatically when changes land on the branch configured in
+# the dashboard (Integrations → GitHub).
+#
+# `project_id` is a local identifier used by the CLI to namespace containers
+# during local development — it is NOT your remote project ref. The remote
+# project is linked in the dashboard, or with:
+#   supabase link --project-ref <your-project-ref>
+#
+# Deliberately minimal: settings you manage in the Supabase dashboard (auth
+# providers, SMTP, rate limits) are left out so this file cannot silently
+# override them on a branch deploy.
+
+project_id = "tmos"
+
+[db]
+# Match your project's Postgres major version. Check it under
+# Project Settings → Infrastructure in the dashboard.
+major_version = 15

@@ -295,32 +295,63 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Storage: private bucket for trade screenshots, paths namespaced by user id
 -- ({user_id}/{trade_id}/{filename}); files are served via signed URLs.
+--
+-- On hosted Supabase, storage.objects is owned by supabase_storage_admin, so
+-- whether a migration may create policies on it depends on the role applying
+-- the migration. Both blocks below therefore degrade to a NOTICE instead of
+-- raising: everything above this point (tables, RLS, views, seeds) must not
+-- be rolled back because of a storage permission. If you see the notice,
+-- create the bucket and policies once from the dashboard — the app's own
+-- tables are unaffected and the rest of the migration has already applied.
+--
+-- Both blocks are also safe to re-run.
 -- ---------------------------------------------------------------------------
 
-insert into storage.buckets (id, name, public)
-values ('trade-screenshots', 'trade-screenshots', false)
-on conflict (id) do nothing;
+do $$
+begin
+  insert into storage.buckets (id, name, public)
+  values ('trade-screenshots', 'trade-screenshots', false)
+  on conflict (id) do nothing;
+exception
+  when insufficient_privilege or undefined_table then
+    raise notice 'Could not create the trade-screenshots bucket (%). Create a PRIVATE bucket named "trade-screenshots" in Storage.', sqlerrm;
+end;
+$$;
 
-create policy "Own screenshots select" on storage.objects
-  for select using (
-    bucket_id = 'trade-screenshots'
-    and auth.uid()::text = (storage.foldername(name))[1]
-  );
+do $$
+begin
+  drop policy if exists "Own screenshots select" on storage.objects;
+  drop policy if exists "Own screenshots insert" on storage.objects;
+  drop policy if exists "Own screenshots update" on storage.objects;
+  drop policy if exists "Own screenshots delete" on storage.objects;
 
-create policy "Own screenshots insert" on storage.objects
-  for insert with check (
-    bucket_id = 'trade-screenshots'
-    and auth.uid()::text = (storage.foldername(name))[1]
-  );
+  -- The first path segment is the owner's user id, so a user can only reach
+  -- objects under their own {user_id}/ prefix.
+  create policy "Own screenshots select" on storage.objects
+    for select using (
+      bucket_id = 'trade-screenshots'
+      and auth.uid()::text = (storage.foldername(name))[1]
+    );
 
-create policy "Own screenshots update" on storage.objects
-  for update using (
-    bucket_id = 'trade-screenshots'
-    and auth.uid()::text = (storage.foldername(name))[1]
-  );
+  create policy "Own screenshots insert" on storage.objects
+    for insert with check (
+      bucket_id = 'trade-screenshots'
+      and auth.uid()::text = (storage.foldername(name))[1]
+    );
 
-create policy "Own screenshots delete" on storage.objects
-  for delete using (
-    bucket_id = 'trade-screenshots'
-    and auth.uid()::text = (storage.foldername(name))[1]
-  );
+  create policy "Own screenshots update" on storage.objects
+    for update using (
+      bucket_id = 'trade-screenshots'
+      and auth.uid()::text = (storage.foldername(name))[1]
+    );
+
+  create policy "Own screenshots delete" on storage.objects
+    for delete using (
+      bucket_id = 'trade-screenshots'
+      and auth.uid()::text = (storage.foldername(name))[1]
+    );
+exception
+  when insufficient_privilege or undefined_table then
+    raise notice 'Could not create storage policies (%). Add them from the dashboard so each user only reaches objects under their own {user_id}/ prefix.', sqlerrm;
+end;
+$$;
