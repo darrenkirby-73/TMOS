@@ -88,6 +88,12 @@ export function formatR(r: number | null | undefined): string {
   return `${sign}${r.toFixed(2)}R`;
 }
 
+/** Format a percentage for display — whole numbers keep the UI calm. */
+export function formatPercent(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return `${Math.round(value)}%`;
+}
+
 /** Format a GBP amount for display. */
 export function formatGbp(amount: number | null | undefined): string {
   if (amount === null || amount === undefined) return "—";

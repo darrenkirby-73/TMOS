@@ -6,7 +6,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field, inputClass } from "@/components/ui/form";
 import { useToast } from "@/components/ui/toast";
-import { formatGbp, formatR } from "@/lib/r";
+import { formatGbp, formatPercent, formatR } from "@/lib/r";
 import { computeRStats } from "@/lib/stats";
 import type { Tag, Trade } from "@/lib/types";
 import { TRADE_TYPES } from "@/lib/types";
@@ -151,7 +151,7 @@ export function TradesView({
         <div className="card p-4">
           <p className="text-xs text-muted">Win rate</p>
           <p className="metric text-2xl font-semibold">
-            {stats.winRate !== null ? `${stats.winRate}%` : "—"}
+            {formatPercent(stats.winRate)}
           </p>
         </div>
         <div className="card p-4">

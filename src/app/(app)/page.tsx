@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LoadError, SetupNotice } from "@/components/setup-notice";
 import { todayIso } from "@/lib/dates";
 import { isSupabaseConfigured } from "@/lib/env";
-import { formatR } from "@/lib/r";
+import { formatPercent, formatR } from "@/lib/r";
 import { computeRStats } from "@/lib/stats";
 import { createClient } from "@/lib/supabase/server";
 import type { DayRecord, Trade } from "@/lib/types";
@@ -117,7 +117,7 @@ export default async function DashboardPage() {
         <div className="card p-5">
           <p className="text-sm text-muted">Win rate</p>
           <p className="metric text-3xl font-semibold">
-            {stats.winRate !== null ? `${stats.winRate}%` : "—"}
+            {formatPercent(stats.winRate)}
           </p>
         </div>
         <div className="card p-5">

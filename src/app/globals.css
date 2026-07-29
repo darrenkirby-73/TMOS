@@ -15,6 +15,12 @@
   --accent-foreground: #ffffff;
   --positive: #16a34a;
   --negative: #dc2626;
+  /* Chart marks are validated separately from text: both modes must sit in
+     the mode's lightness band and stay separable under colour-vision
+     deficiency against the card surface. */
+  --chart-positive: #16a34a;
+  --chart-negative: #dc2626;
+  --chart-grid: rgba(0, 0, 0, 0.08);
 }
 
 .dark {
@@ -30,6 +36,9 @@
   --accent-foreground: #ffffff;
   --positive: #4ade80;
   --negative: #f87171;
+  --chart-positive: #16a34a;
+  --chart-negative: #ef4444;
+  --chart-grid: rgba(255, 255, 255, 0.1);
 }
 
 @theme inline {
@@ -45,6 +54,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
+  --color-chart-positive: var(--chart-positive);
+  --color-chart-negative: var(--chart-negative);
   --font-sans:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
