@@ -32,15 +32,27 @@ async function loadData(): Promise<{
   };
 }
 
-function StatusPill({ done, label }: { done: boolean; label: string }) {
+function StatusPill({
+  done,
+  label,
+  href,
+}: {
+  done: boolean;
+  label: string;
+  href?: string;
+}) {
+  const className = `rounded-full px-3 py-1 text-xs font-medium ${
+    done ? "bg-accent-soft text-accent" : "bg-background text-muted"
+  }`;
+  const content = `${label} ${done ? "✓" : "·"}`;
+  if (!href) return <span className={className}>{content}</span>;
   return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-medium ${
-        done ? "bg-accent-soft text-accent" : "bg-background text-muted"
-      }`}
+    <Link
+      href={href}
+      className={`${className} transition-opacity hover:opacity-80`}
     >
-      {label} {done ? "✓" : "·"}
-    </span>
+      {content}
+    </Link>
   );
 }
 
@@ -83,6 +95,7 @@ export default async function DashboardPage() {
           <StatusPill
             done={Boolean(today?.morning_completed_at)}
             label="Morning check-in"
+            href="/morning"
           />
           <StatusPill
             done={Boolean(today?.evening_completed_at)}
