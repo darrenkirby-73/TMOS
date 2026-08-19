@@ -37,17 +37,49 @@ There is no sign-up flow — this is a single-user app. Create yourself under
 
 ### The app
 
-Deploy to Vercel (or run locally with `npm run dev`) with these environment
-variables:
+**Deploy via Vercel's Git integration** — no CLI needed, and it redeploys on
+every merge to `main`, matching how the database already updates:
 
-| Variable | Required | Notes |
+1. [vercel.com/new](https://vercel.com/new) → **Import** the `darrenkirby-73/TMOS`
+   repository. Leave every build setting alone; Next.js is detected
+   automatically and needs no `vercel.json`.
+2. Add the environment variables below **before** the first deploy. A build
+   without them succeeds, but every page renders the setup notice instead of
+   the app.
+3. Deploy, then open `/api/health` on the deployment URL. It needs no sign-in
+   and answers the only question a green build doesn't:
+
+   ```json
+   { "ok": true, "supabaseConfigured": true, "missingEnvVars": [],
+     "coachMode": "mock", "schemaReachable": true }
+   ```
+
+   Anything other than `ok: true` names the problem — which variable is
+   missing, or the error coming back from Supabase. `coachMode` is `mock`
+   until `ANTHROPIC_API_KEY` is set, which is fine. It reports state only, no
+   values and no data.
+4. Sign in with the user you created above.
+
+> **Changing a variable later does not change a deployment that already
+> exists.** Vercel bakes `NEXT_PUBLIC_` values in at build time, so save the
+> variable and then redeploy — otherwise `/api/health` keeps reporting it
+> missing.
+
+To run it locally instead: `npm run dev` with the same variables in
+`.env.local`.
+
+| Variable | Required | Value |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | yes | Project Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Project Settings → API |
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | `https://njhisvelihjilrwmlnpv.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Project Settings → API → anon/public key |
 | `ANTHROPIC_API_KEY` | no | Omit to run the coach in mock mode |
 
-Without the Supabase variables the app still renders, showing a setup notice
-on every page — useful for checking the deploy before wiring the database.
+The first two are `NEXT_PUBLIC_` and are compiled into the browser bundle —
+that is expected for Supabase's anon key, which is safe to expose because row
+level security is what actually protects the data. `ANTHROPIC_API_KEY` is
+**not** public: it is read only on the server and must never be given a
+`NEXT_PUBLIC_` prefix.
+
 
 ### Sample data (recommended)
 
@@ -77,6 +109,7 @@ a click path.
 
 ### Access control
 
+- [ ] `/api/health` returns `ok: true` with `schemaReachable: true`.
 - [ ] Signed out, visiting `/trades` (or any page) redirects to `/login`.
 - [ ] Signing in lands on the dashboard.
 - [ ] Sign out returns you to `/login` and protected pages redirect again.

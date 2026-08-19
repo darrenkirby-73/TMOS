@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from "@/lib/env";
+import { isSupabaseConfigured, missingSupabaseVars } from "@/lib/env";
 import { signIn } from "./actions";
 
 export default async function LoginPage({
@@ -51,14 +51,26 @@ export default async function LoginPage({
             </button>
           </form>
         ) : (
-          <p className="mt-8 text-sm text-muted">
-            Supabase isn&apos;t configured yet. Copy{" "}
-            <code className="rounded bg-background px-1 py-0.5">
-              .env.example
-            </code>{" "}
-            to <code className="rounded bg-background px-1 py-0.5">.env.local</code>{" "}
-            and fill in your project&apos;s URL and anon key.
-          </p>
+          <div className="mt-8 text-sm text-muted">
+            <p>
+              Supabase isn&apos;t configured yet, so there&apos;s nothing to
+              sign in to. Missing:
+            </p>
+            <ul className="mt-2 flex flex-col gap-1">
+              {missingSupabaseVars.map((name) => (
+                <li key={name}>
+                  <code className="rounded bg-background px-1 py-0.5">
+                    {name}
+                  </code>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3">
+              Set them in Vercel (Project Settings → Environment Variables, then
+              redeploy) or in <code>.env.local</code> when running locally. The
+              values come from Supabase under Project Settings → API.
+            </p>
+          </div>
         )}
       </div>
     </main>

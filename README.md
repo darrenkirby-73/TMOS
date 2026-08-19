@@ -74,7 +74,10 @@ can't be verified from your own records, the app asks you to confirm it.
    ```
 
    Signing in seeds your starter tags automatically. Before Supabase is
-   configured every page renders with a setup notice rather than failing.
+   configured every page renders a setup notice naming the missing variables
+   rather than failing. `GET /api/health` reports the same thing as JSON —
+   config state and whether the schema is actually reachable — with no sign-in
+   required, which is the quickest way to check a deployment is wired up.
 
 6. **Load sample data (optional, recommended for evaluation).** Reports and
    the weekly review are hard to judge against an empty database. Paste your
@@ -124,6 +127,7 @@ src/
       weekly/           #   Weekly Review
       coach/            #   Coaching Agent + history
     login/              # Email/password sign-in (server actions)
+    api/health/         # Unauthenticated config/schema wiring check
     api/screenshot/     # Signed-URL redirect for trade screenshots
   components/
     charts/             # Recharts wrappers, theme-aware
