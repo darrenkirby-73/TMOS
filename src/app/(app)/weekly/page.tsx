@@ -1,5 +1,5 @@
 import { LoadError, SetupNotice } from "@/components/setup-notice";
-import { addDaysIso, todayIso, weekStartIso } from "@/lib/dates";
+import { addDaysIso, safeDateParam, weekStartIso } from "@/lib/dates";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type { DayRecord, Trade, WeeklyReflection } from "@/lib/types";
@@ -14,8 +14,9 @@ export default async function WeeklyPage({
   searchParams: Promise<{ week?: string }>;
 }) {
   const { week } = await searchParams;
-  // Normalise whatever arrives to the Monday of that week.
-  const weekStart = weekStartIso(week ?? todayIso());
+  // Normalise whatever arrives to the Monday of that week, falling back to
+  // the current week when the URL carries a malformed date.
+  const weekStart = weekStartIso(safeDateParam(week));
   const weekEnd = addDaysIso(weekStart, 6);
 
   let dayRecords: DayRecord[] = [];
