@@ -8,3 +8,12 @@ export const supabaseAnonKey =
  */
 export const isSupabaseConfigured =
   supabaseUrl.length > 0 && supabaseAnonKey.length > 0;
+
+/**
+ * Which of the two required variables are absent, so the setup notice can
+ * name them rather than making you check both. Names only — never values.
+ */
+export const missingSupabaseVars: string[] = [
+  ...(supabaseUrl.length > 0 ? [] : ["NEXT_PUBLIC_SUPABASE_URL"]),
+  ...(supabaseAnonKey.length > 0 ? [] : ["NEXT_PUBLIC_SUPABASE_ANON_KEY"]),
+];

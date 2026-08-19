@@ -46,7 +46,24 @@ every merge to `main`, matching how the database already updates:
 2. Add the environment variables below **before** the first deploy. A build
    without them succeeds, but every page renders the setup notice instead of
    the app.
-3. Deploy, then open the URL and sign in with the user you created above.
+3. Deploy, then open `/api/health` on the deployment URL. It needs no sign-in
+   and answers the only question a green build doesn't:
+
+   ```json
+   { "ok": true, "supabaseConfigured": true, "missingEnvVars": [],
+     "coachMode": "mock", "schemaReachable": true }
+   ```
+
+   Anything other than `ok: true` names the problem — which variable is
+   missing, or the error coming back from Supabase. `coachMode` is `mock`
+   until `ANTHROPIC_API_KEY` is set, which is fine. It reports state only, no
+   values and no data.
+4. Sign in with the user you created above.
+
+> **Changing a variable later does not change a deployment that already
+> exists.** Vercel bakes `NEXT_PUBLIC_` values in at build time, so save the
+> variable and then redeploy — otherwise `/api/health` keeps reporting it
+> missing.
 
 To run it locally instead: `npm run dev` with the same variables in
 `.env.local`.
@@ -92,6 +109,7 @@ a click path.
 
 ### Access control
 
+- [ ] `/api/health` returns `ok: true` with `schemaReachable: true`.
 - [ ] Signed out, visiting `/trades` (or any page) redirects to `/login`.
 - [ ] Signing in lands on the dashboard.
 - [ ] Sign out returns you to `/login` and protected pages redirect again.

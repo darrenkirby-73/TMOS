@@ -40,7 +40,12 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublic = path.startsWith("/login") || path.startsWith("/auth");
+  // /api/health reports configuration state only — never data — and has to
+  // answer before anyone can sign in, so it stays outside the auth gate.
+  const isPublic =
+    path.startsWith("/login") ||
+    path.startsWith("/auth") ||
+    path === "/api/health";
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
