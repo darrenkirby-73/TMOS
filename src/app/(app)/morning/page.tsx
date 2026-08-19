@@ -1,5 +1,5 @@
 import { LoadError, SetupNotice } from "@/components/setup-notice";
-import { shortDayLabel, todayIso } from "@/lib/dates";
+import { safeDateParam, shortDayLabel } from "@/lib/dates";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type { ChecklistItem, DayRecord, Tag } from "@/lib/types";
@@ -11,7 +11,8 @@ export default async function MorningPage({
   searchParams: Promise<{ date?: string }>;
 }) {
   const { date: dateParam } = await searchParams;
-  const date = dateParam ?? todayIso();
+  // Falls back to today when the URL carries a malformed date.
+  const date = safeDateParam(dateParam);
 
   let record: DayRecord | null = null;
   let previousChecklist: ChecklistItem[] | null = null;

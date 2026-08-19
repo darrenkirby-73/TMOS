@@ -76,10 +76,19 @@ can't be verified from your own records, the app asks you to confirm it.
    Signing in seeds your starter tags automatically. Before Supabase is
    configured every page renders with a setup notice rather than failing.
 
-6. **Enable the coaching agent (optional).** Add an `ANTHROPIC_API_KEY` to
+6. **Load sample data (optional, recommended for evaluation).** Reports and
+   the weekly review are hard to judge against an empty database. Paste your
+   user id into `supabase/demo-data.sql` and run it in the SQL editor for 62
+   days of synthetic history — around 58 trades, matching check-ins, and two
+   weekly reflections. `supabase/demo-data-clear.sql` removes it again.
+
+7. **Enable the coaching agent (optional).** Add an `ANTHROPIC_API_KEY` to
    `.env.local`. Without one the coach runs in **mock mode**: it still
    assembles your data, composes the real prompt, and logs the session — it
    just doesn't call a model. Nothing else in the app depends on it.
+
+**Testing it properly:** `docs/UAT.md` has the deployment steps, the sample-data
+instructions, and a per-feature acceptance checklist.
 
 ## Using it
 
@@ -142,6 +151,10 @@ supabase/migrations/    # Schema, RLS, views, seed function, storage bucket
 - **Missing data is never invented.** Reports state what they exclude, the
   evening check-in flags unresolved trades, and the coach's payload marks
   absent fields as absent.
+- **Dates resolve in one fixed timezone** (`APP_TIMEZONE` in `src/lib/dates.ts`,
+  Europe/London). Server code runs in UTC on most hosts while the browser runs
+  in your zone, so "today" is pinned rather than taken from whichever clock
+  happens to be asking. Change that constant if you relocate.
 - **Weekly aggregates are computed SQL views** (`weekly_day_summary`,
   `weekly_trade_summary`), not stored summary tables.
 - **Seeded tags and checklist items are placeholders** — clearly commented as
