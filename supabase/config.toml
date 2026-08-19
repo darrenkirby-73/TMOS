@@ -17,6 +17,5 @@
 project_id = "tmos"
 
 [db]
-# Match your project's Postgres major version. Check it under
-# Project Settings → Infrastructure in the dashboard.
-major_version = 15
+# Matches the linked project's Postgres major version (17.6).
+major_version = 17
