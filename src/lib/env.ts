@@ -1,6 +1,14 @@
+/**
+ * Supabase configuration.
+ *
+ * Server code reads these at request time, so saving them in the hosting
+ * dashboard is enough — but only for pages that are actually rendered per
+ * request. A page prerendered into static HTML captures whatever this said
+ * during the build, and keeps serving that. Every authenticated page is
+ * therefore pinned dynamic in src/app/(app)/layout.tsx.
+ */
 export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-export const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 /**
  * The app must render (with a setup notice) before Supabase is configured,
