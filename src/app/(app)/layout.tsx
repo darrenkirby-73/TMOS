@@ -5,6 +5,16 @@ import { ToastProvider } from "@/components/ui/toast";
 import { isSupabaseConfigured } from "@/lib/env";
 import { signOut } from "@/app/login/actions";
 
+/**
+ * Every page in here is signed-in, per-user data — none of it may be
+ * prerendered into a static asset. Without this, a build that ran before
+ * Supabase was configured bakes the setup notice into the HTML of pages that
+ * don't happen to touch cookies at the top level, and they keep serving it
+ * from cache even once the configuration is fixed. Inherited by all child
+ * segments.
+ */
+export const dynamic = "force-dynamic";
+
 export default function AppLayout({
   children,
 }: Readonly<{

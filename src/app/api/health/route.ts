@@ -4,12 +4,19 @@ import { isSupabaseConfigured, missingSupabaseVars } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Unauthenticated wiring check for a fresh deployment: is the config present,
- * and does the schema actually exist behind it? A green build proves neither.
+ * Unauthenticated wiring check for a deployment: is the config present, where
+ * is it present, which build am I actually looking at, and does the schema
+ * exist behind it? A green build proves none of that.
  *
- * Deliberately reports names and states only — no values, no user data. It is
- * public (see the isPublic list in src/proxy.ts) because its whole purpose is
- * to answer "why can't I sign in?" before anyone can sign in.
+ * `deployment` matters more than it looks. Vercel's hashed per-deployment
+ * URLs pin one build forever, and variables scoped to Preview never reach
+ * Production. From the setup notice alone those look identical to having set
+ * nothing, so the commit, branch and environment are reported here to tell
+ * the three apart.
+ *
+ * Names and states only — no values, no user data. It is public (see the
+ * isPublic list in src/proxy.ts) because its whole purpose is to answer "why
+ * can't I sign in?" before anyone can sign in.
  */
 export const dynamic = "force-dynamic";
 
@@ -17,8 +24,13 @@ export async function GET() {
   const checks: Record<string, unknown> = {
     supabaseConfigured: isSupabaseConfigured,
     missingEnvVars: missingSupabaseVars,
-    // Without a key the coach still works via paste-through, so this reports
-    // what's available rather than implying the feature is off.
+    deployment: {
+      // Set by Vercel at runtime; undefined when running anywhere else.
+      environment: process.env.VERCEL_ENV ?? "not-vercel",
+      commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8) ?? null,
+      branch: process.env.VERCEL_GIT_COMMIT_REF ?? null,
+      url: process.env.VERCEL_URL ?? null,
+    },
     coachMode: isCoachConfigured() ? "api" : "paste-through/mock",
   };
 

@@ -60,10 +60,18 @@ every merge to `main`, matching how the database already updates:
    values and no data.
 4. Sign in with the user you created above.
 
-> **Changing a variable later does not change a deployment that already
-> exists.** Vercel bakes `NEXT_PUBLIC_` values in at build time, so save the
-> variable and then redeploy — otherwise `/api/health` keeps reporting it
-> missing.
+> **If every page shows the setup notice**, work through these in order —
+> `/api/health`'s `deployment` block tells you which one you're in:
+>
+> 1. **You're on a hashed deployment URL.** `tmos-<hash>-….vercel.app` pins
+>    one specific build and its configuration forever. Use the project's
+>    production domain from the top of the Vercel project page instead.
+> 2. **The variables are scoped to the wrong environment.** In Vercel each
+>    variable is ticked for Production, Preview and Development separately.
+>    Production-only variables never reach a preview deployment, and vice
+>    versa. Check `deployment.environment` against where you set them.
+> 3. **The deployment predates the variables.** Compare `deployment.commit`
+>    with the latest commit on `main`; if it's older, redeploy.
 
 To run it locally instead: `npm run dev` with the same variables in
 `.env.local`.
