@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { COACH_MODEL, MOCK_MODEL } from "@/lib/coach-models";
 import { mockResponse } from "@/lib/prompts/mock";
 import type { ComposedPrompt } from "@/lib/prompts";
 import type { CoachWorkflow } from "@/lib/types";
@@ -11,8 +12,7 @@ import type { CoachWorkflow } from "@/lib/types";
  * place; the prompts themselves are in src/lib/prompts/.
  */
 
-export const COACH_MODEL = "claude-opus-5";
-export const MOCK_MODEL = "mock";
+export { COACH_MODEL, MOCK_MODEL, PASTE_MODEL } from "@/lib/coach-models";
 
 /** Server-only: never exposed to the browser. */
 export function isCoachConfigured(): boolean {
@@ -74,7 +74,7 @@ export async function runCoach(
 /** Maps SDK errors onto messages worth showing the user. */
 export function describeCoachError(error: unknown): string {
   if (error instanceof Anthropic.AuthenticationError) {
-    return "Claude rejected the API key. Check ANTHROPIC_API_KEY in .env.local.";
+    return "Claude rejected the API key. Check ANTHROPIC_API_KEY — in .env.local locally, or the deployment's environment variables.";
   }
   if (error instanceof Anthropic.RateLimitError) {
     return "Rate limited by the Claude API. Wait a moment and try again.";

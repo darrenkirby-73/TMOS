@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Markdown } from "@/components/markdown";
 import { LoadError, SetupNotice } from "@/components/setup-notice";
 import { EmptyState } from "@/components/ui/empty-state";
+import { modelLabel } from "@/lib/coach-models";
 import { isSupabaseConfigured } from "@/lib/env";
 import { WORKFLOWS } from "@/lib/prompts";
 import { createClient } from "@/lib/supabase/server";
@@ -57,7 +58,7 @@ export default async function CoachHistoryPage() {
                     dateStyle: "medium",
                     timeStyle: "short",
                   })}{" "}
-                  · {s.model === "mock" ? "mock mode" : s.model}
+                  · {modelLabel(s.model)}
                 </span>
               </summary>
               <div className="mt-4 border-t border-border-subtle pt-4">

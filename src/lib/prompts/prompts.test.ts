@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { composePrompt, WORKFLOW_LIST, WORKFLOWS } from "./index";
+import { composePrompt, renderForPaste, WORKFLOW_LIST, WORKFLOWS } from "./index";
 import { mockResponse } from "./mock";
 import type { DayRecord, Trade } from "@/lib/types";
 
@@ -221,5 +221,37 @@ describe("mock mode", () => {
     );
     const out = mockResponse("morning_coach", userMessage);
     expect(out).toMatch(/\d+ fields? in your records/);
+  });
+});
+
+describe("renderForPaste", () => {
+  it("carries the hard constraints into the flattened prompt", () => {
+    // A Claude chat has no system field. If the flatten dropped the system
+    // turn, paste-through would silently run without the constraints that
+    // stop the coach recommending trades — the one failure that matters.
+    for (const def of WORKFLOW_LIST) {
+      const text = renderForPaste(composePrompt(def.id, {}, {}));
+      expect(text).toMatch(/NEVER tell the user what to buy or sell/);
+      expect(text).toMatch(/NEVER predict markets/);
+      expect(text).toMatch(/NEVER invent, estimate, or assume market data/);
+      expect(text).toContain(def.taskPrompt);
+    }
+  });
+
+  it("keeps both turns whole and in order", () => {
+    const prompt = composePrompt("morning_coach", { note: "slept badly" }, {});
+    const text = renderForPaste(prompt);
+    expect(text).toContain(prompt.system);
+    expect(text).toContain(prompt.userMessage);
+    expect(text.indexOf(prompt.system)).toBeLessThan(
+      text.indexOf(prompt.userMessage),
+    );
+    expect(text).toContain("note: slept badly");
+  });
+
+  it("keeps the missing-data markers the payload relies on", () => {
+    const text = renderForPaste(composePrompt("evening_debrief", {}, {}));
+    expect(text).toContain("NO RECORD");
+    expect(text).toContain("do not fill it in");
   });
 });

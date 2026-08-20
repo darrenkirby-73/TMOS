@@ -72,7 +72,7 @@ To run it locally instead: `npm run dev` with the same variables in
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | yes | `https://njhisvelihjilrwmlnpv.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Project Settings → API → anon/public key |
-| `ANTHROPIC_API_KEY` | no | Omit to run the coach in mock mode |
+| `ANTHROPIC_API_KEY` | no | Omit and the coach runs paste-through or mock instead |
 
 The first two are `NEXT_PUBLIC_` and are compiled into the browser bundle —
 that is expected for Supabase's anon key, which is safe to expose because row
@@ -179,8 +179,22 @@ a click path.
 
 ### Coach
 
-- [ ] Without `ANTHROPIC_API_KEY`, a mock-mode notice appears and running a
-      workflow returns an obviously-labelled mock response.
+The coach offers up to three ways to answer, picked with the *How to answer*
+buttons. **Direct API** appears only when `ANTHROPIC_API_KEY` is set and bills
+per run. **Paste-through** costs nothing: TMOS composes the prompt, you run it
+in a Claude chat and paste the reply back. **Mock** consults no model at all.
+
+- [ ] Without a key, *Direct API* is absent and *Paste-through* is selected by
+      default; with a key, *Direct API* is the default.
+- [ ] **Paste-through**: *Compose prompt* shows the full prompt with a copy
+      button. Copy it into a Claude chat, paste the reply into the box, save —
+      the response appears and the session is in `/coach/history` marked
+      *paste-through*.
+- [ ] The copied prompt starts with the constraints ("NEVER tell the user what
+      to buy or sell") and ends with your own records. If the constraints are
+      missing, stop — that's the one thing paste-through must not lose.
+- [ ] *Discard* clears the prompt without saving anything.
+- [ ] **Mock** returns an obviously-labelled mock response, still logged.
 - [ ] With a key, each of the five workflows returns process feedback.
 - [ ] **Pre-Trade Review** defaults *earnings* and *trend filter* to
       **not checked**, and the response lists them as missing data to confirm

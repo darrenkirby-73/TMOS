@@ -17,7 +17,9 @@ export async function GET() {
   const checks: Record<string, unknown> = {
     supabaseConfigured: isSupabaseConfigured,
     missingEnvVars: missingSupabaseVars,
-    coachMode: isCoachConfigured() ? "live" : "mock",
+    // Without a key the coach still works via paste-through, so this reports
+    // what's available rather than implying the feature is off.
+    coachMode: isCoachConfigured() ? "api" : "paste-through/mock",
   };
 
   if (isSupabaseConfigured) {
