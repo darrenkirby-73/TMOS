@@ -72,6 +72,12 @@ every merge to `main`, matching how the database already updates:
 >    versa. Check `deployment.environment` against where you set them.
 > 3. **The deployment predates the variables.** Compare `deployment.commit`
 >    with the latest commit on `main`; if it's older, redeploy.
+> 4. **A variable is set but unusable** — `configProblems` is non-empty and
+>    names the character. Copying from the Supabase dashboard can pick up
+>    label text along with the value; keys and URLs are plain ASCII, and a
+>    stray `→` in the anon key otherwise fails deep inside `fetch` as
+>    `Cannot convert argument to a ByteString`. Surrounding whitespace is
+>    trimmed automatically and is not a problem.
 
 To run it locally instead: `npm run dev` with the same variables in
 `.env.local`.
