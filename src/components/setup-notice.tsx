@@ -1,4 +1,4 @@
-import { missingSupabaseVars } from "@/lib/env";
+import { configProblems, missingSupabaseVars } from "@/lib/env";
 
 /**
  * Shown wherever data would be, while Supabase isn't configured. It names the
@@ -7,6 +7,27 @@ import { missingSupabaseVars } from "@/lib/env";
  * on its own.
  */
 export function SetupNotice() {
+  // A value that's present but unusable is a different problem with a
+  // different fix, and saying "not set" about it sends you looking in the
+  // wrong place.
+  if (missingSupabaseVars.length === 0 && configProblems.length > 0) {
+    return (
+      <div className="card p-5 text-sm">
+        <p className="font-medium">Supabase is configured, but the values won&apos;t work</p>
+        <ul className="mt-2 flex flex-col gap-2 text-muted">
+          {configProblems.map((problem) => (
+            <li key={problem}>{problem}</li>
+          ))}
+        </ul>
+        <p className="mt-3 text-muted">
+          Re-copy the value from Supabase (Project Settings → API) into your
+          deployment&apos;s environment variables, taking just the value
+          itself, and redeploy.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="card p-5 text-sm">
       <p className="font-medium">Connect Supabase to get started</p>

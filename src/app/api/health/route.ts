@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { isCoachConfigured } from "@/lib/coach";
-import { isSupabaseConfigured, missingSupabaseVars } from "@/lib/env";
+import {
+  configProblems,
+  isSupabaseConfigured,
+  missingSupabaseVars,
+} from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -24,6 +28,8 @@ export async function GET() {
   const checks: Record<string, unknown> = {
     supabaseConfigured: isSupabaseConfigured,
     missingEnvVars: missingSupabaseVars,
+    // Present but unusable — a stray character or a value that isn't a URL.
+    configProblems,
     deployment: {
       // Set by Vercel at runtime; undefined when running anywhere else.
       environment: process.env.VERCEL_ENV ?? "not-vercel",
