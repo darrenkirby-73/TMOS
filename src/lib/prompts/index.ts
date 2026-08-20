@@ -57,5 +57,25 @@ export function composePrompt(
   return { system, userMessage };
 }
 
+/**
+ * Flatten a composed prompt into one block of text for paste-through mode.
+ *
+ * A Claude chat has no separate system field, so the system turn is folded
+ * into the message under a heading rather than dropped — the constraints in
+ * SYSTEM_PROMPT are the whole point, and a paste that loses them would get
+ * coaching this app is explicitly designed not to give.
+ */
+export function renderForPaste(prompt: ComposedPrompt): string {
+  return [
+    "You are acting as the coach described below. Follow these instructions exactly, including the constraints.",
+    "",
+    prompt.system,
+    "",
+    "---",
+    "",
+    prompt.userMessage,
+  ].join("\n");
+}
+
 export { SYSTEM_PROMPT, ROLE_PROMPTS };
 export type { CoachContext, WorkflowDefinition };

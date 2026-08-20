@@ -85,10 +85,20 @@ can't be verified from your own records, the app asks you to confirm it.
    days of synthetic history — around 58 trades, matching check-ins, and two
    weekly reflections. `supabase/demo-data-clear.sql` removes it again.
 
-7. **Enable the coaching agent (optional).** Add an `ANTHROPIC_API_KEY` to
-   `.env.local`. Without one the coach runs in **mock mode**: it still
-   assembles your data, composes the real prompt, and logs the session — it
-   just doesn't call a model. Nothing else in the app depends on it.
+7. **Choose how the coach answers.** Three modes, picked in the UI:
+
+   - **Direct API** — calls Claude with the composed prompt. Needs
+     `ANTHROPIC_API_KEY` in `.env.local` (or the deployment's environment) and
+     bills per run.
+   - **Paste-through** — TMOS composes the prompt and hands it to you with a
+     copy button; you run it in a Claude chat and paste the reply back, which
+     is stored as a normal session. Same prompts, same data payload, same
+     constraints, no API account and no per-run cost. This is the default
+     without a key.
+   - **Mock** — assembles and logs but consults no model, returning a
+     labelled placeholder. For checking the plumbing.
+
+   Nothing else in the app depends on any of them.
 
 **Testing it properly:** `docs/UAT.md` has the deployment steps, the sample-data
 instructions, and a per-feature acceptance checklist.
@@ -103,7 +113,7 @@ instructions, and a per-feature acceptance checklist.
 | **Evening** | Debrief with numbers pre-filled from that day's trades, all overridable |
 | **Reports** | Win rate, average R winner/loser, expectancy, cumulative R, R per trade, rolling 20-trade expectancy, performance by setup/system/trade type |
 | **Weekly** | Week picker, summary cards, stress and mistake charts, decision-quality distribution, weekly reflection |
-| **Coach** | Five coaching workflows over your own records, with a reviewable session history |
+| **Coach** | Five coaching workflows over your own records, answered by API / paste-through / mock, with a reviewable session history |
 
 ### Coaching workflows
 
@@ -139,6 +149,7 @@ src/
     day-suggestions.ts  # Evening check-in suggestions from the trade log
     dates.ts            # Monday-start week helpers
     coach.ts            # Claude API call + mock mode
+    coach-models.ts     # Session model ids and labels (client-safe)
     prompts/            # System / role / workflow prompts + payload assembly
     supabase/           # Browser and server clients
   proxy.ts              # Session refresh + auth gating
