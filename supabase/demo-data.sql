@@ -30,7 +30,7 @@
 
 do $$
 declare
-  demo_user uuid := '00000000-0000-0000-0000-000000000000';  -- <<< PASTE YOUR USER ID
+  demo_user uuid := 'adcf1596-fa0c-4096-9ece-4acc9d029b9b';  -- <<< PASTE YOUR USER ID
   start_date date := current_date - interval '62 days';
   d date;
   i int := 0;
