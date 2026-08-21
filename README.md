@@ -65,7 +65,9 @@ can't be verified from your own records, the app asks you to confirm it.
    > Screenshot upload is the only feature affected until you do.
 
 4. **Create your user** in the Supabase dashboard (Authentication → Users →
-   Add user). This is a single-user app — there is no sign-up flow.
+   Add user → Create new user), ticking **Auto Confirm User** — sign-in fails
+   with "Email not confirmed" otherwise, and no email flow is wired up. This
+   is a single-user app; there is no sign-up flow.
 
 5. **Run the dev server**
 
