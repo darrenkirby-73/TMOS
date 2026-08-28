@@ -33,7 +33,12 @@ Screenshot upload is the only feature affected; everything else works without it
 ### Your user
 
 There is no sign-up flow — this is a single-user app. Create yourself under
-**Authentication → Users → Add user** and note the UID.
+**Authentication → Users → Add user → Create new user**, and **tick Auto
+Confirm User**. Without it the account stays unconfirmed and signing in fails
+with "Email not confirmed" — there is no email flow wired up to fix that from
+the app side.
+
+Note the UID from the users list; the sample-data script below needs it.
 
 ### The app
 

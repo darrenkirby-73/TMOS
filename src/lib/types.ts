@@ -110,6 +110,35 @@ export type Tag = {
   created_at: string;
 };
 
+export type SystemStatus = "active" | "testing" | "retired";
+
+export const SYSTEM_STATUSES: { value: SystemStatus; label: string }[] = [
+  { value: "active", label: "Active" },
+  { value: "testing", label: "Testing" },
+  { value: "retired", label: "Retired" },
+];
+
+/**
+ * The definition behind a system name. Trades reference systems by text, not
+ * by id, so a definition can be edited or retired without touching history.
+ */
+export type TradingSystem = {
+  id: string;
+  user_id: string;
+  name: string;
+  status: SystemStatus;
+  markets: string | null;
+  timeframe: string | null;
+  entry_rules: string | null;
+  exit_rules: string | null;
+  stop_rules: string | null;
+  position_sizing: string | null;
+  edge_rationale: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type WeeklyReflection = {
   id: string;
   user_id: string;
