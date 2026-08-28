@@ -1,11 +1,21 @@
 import Link from "next/link";
+import { TrendStrip } from "@/components/charts/trend-strip";
 import { LoadError, SetupNotice } from "@/components/setup-notice";
 import { todayIso } from "@/lib/dates";
 import { isSupabaseConfigured } from "@/lib/env";
 import { formatPercent, formatR } from "@/lib/r";
 import { computeRStats } from "@/lib/stats";
+import {
+  compareLatest,
+  disciplineByPeriod,
+  lastPeriods,
+  trendByPeriod,
+} from "@/lib/trends";
 import { createClient } from "@/lib/supabase/server";
 import type { DayRecord, Trade } from "@/lib/types";
+
+/** How much recent history the dashboard strip covers. */
+const STRIP_WEEKS = 8;
 
 async function loadData(): Promise<{
   today: DayRecord | null;
@@ -68,6 +78,14 @@ export default async function DashboardPage() {
   const stats = computeRStats(closed.map((t) => t.r_result as number));
   const openTrades = trades.filter((t) => t.status === "open");
   const recent = trades.slice(0, 5);
+
+  // Direction of travel over recent weeks. The tiles above are all-time
+  // aggregates and say nothing about whether things are improving.
+  const recentWeeks = lastPeriods(trendByPeriod(trades, "week"), STRIP_WEEKS);
+  const recentDiscipline = lastPeriods(
+    disciplineByPeriod(trades, [], "week"),
+    STRIP_WEEKS,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -140,6 +158,43 @@ export default async function DashboardPage() {
             {formatR(stats.totalR)}
           </p>
         </div>
+      </section>
+
+      {/* Direction of travel */}
+      <section aria-label="Recent trend" className="card p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold">Direction of travel</h2>
+          <Link href="/trends" className="text-sm text-accent hover:underline">
+            All trends →
+          </Link>
+        </div>
+        <TrendStrip
+          sparkline={recentWeeks.map((p) => ({
+            label: p.label,
+            expectancy: p.expectancy,
+          }))}
+          weeks={STRIP_WEEKS}
+          measures={[
+            {
+              label: "Expectancy",
+              delta: compareLatest(recentWeeks.map((p) => p.expectancy)),
+              format: formatR,
+              goodWhen: "higher",
+            },
+            {
+              label: "Plan compliance",
+              delta: compareLatest(recentDiscipline.map((d) => d.planCompliance)),
+              format: formatPercent,
+              goodWhen: "higher",
+            },
+            {
+              label: "Mistake rate",
+              delta: compareLatest(recentDiscipline.map((d) => d.mistakeRate)),
+              format: formatPercent,
+              goodWhen: "lower",
+            },
+          ]}
+        />
       </section>
 
       {/* Recent trades */}
