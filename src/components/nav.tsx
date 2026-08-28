@@ -11,6 +11,7 @@ const links = [
   { href: "/reports", label: "Reports" },
   { href: "/weekly", label: "Weekly" },
   { href: "/coach", label: "Coach" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export function Nav({ className = "" }: { className?: string }) {
@@ -19,7 +20,7 @@ export function Nav({ className = "" }: { className?: string }) {
   return (
     <nav
       // Scrolls horizontally rather than wrapping or clipping — on a phone
-      // this row holds all seven destinations.
+      // this row holds every destination.
       className={`-mx-1 flex items-center gap-1 overflow-x-auto px-1 ${className}`}
     >
       {links.map(({ href, label }) => {
