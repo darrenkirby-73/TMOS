@@ -2,7 +2,7 @@
 
 import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
 import { ChartTooltip } from "./chart-card";
-import { formatR } from "@/lib/r";
+import { formatPercent, formatR } from "@/lib/r";
 import type { TrendDelta } from "@/lib/trends";
 
 /**
@@ -11,14 +11,28 @@ import type { TrendDelta } from "@/lib/trends";
  * better — this answers that in one glance without becoming a second Reports
  * page.
  */
+/**
+ * `format` is a NAME, not a function, and deliberately so: this is a client
+ * component rendered from the dashboard server component, and React cannot
+ * serialize a function across that boundary — passing one throws at request
+ * time, which a `force-dynamic` page will not surface until someone loads it.
+ */
 export type StripMeasure = {
   label: string;
   delta: TrendDelta;
-  format: (v: number | null) => string;
+  format: FormatName;
   goodWhen: "higher" | "lower";
 };
 
+export type FormatName = "r" | "percent";
+
+const FORMATTERS: Record<FormatName, (v: number | null) => string> = {
+  r: formatR,
+  percent: formatPercent,
+};
+
 function Delta({ measure }: { measure: StripMeasure }) {
+  const format = FORMATTERS[measure.format];
   const { latest, previousAverage, delta } = measure.delta;
   const improving =
     delta === null || delta === 0
@@ -31,7 +45,7 @@ function Delta({ measure }: { measure: StripMeasure }) {
     <div>
       <p className="text-xs text-muted">{measure.label}</p>
       <p className="metric mt-0.5 text-lg font-semibold">
-        {measure.format(latest)}
+        {format(latest)}
       </p>
       {delta === null ? (
         <p className="text-xs text-faint">
@@ -50,7 +64,7 @@ function Delta({ measure }: { measure: StripMeasure }) {
           }`}
         >
           {delta > 0 ? "+" : ""}
-          {measure.format(delta)} vs earlier
+          {format(delta)} vs earlier
         </p>
       )}
     </div>
