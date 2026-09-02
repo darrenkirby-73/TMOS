@@ -178,19 +178,19 @@ export default async function DashboardPage() {
             {
               label: "Expectancy",
               delta: compareLatest(recentWeeks.map((p) => p.expectancy)),
-              format: formatR,
+              format: "r",
               goodWhen: "higher",
             },
             {
               label: "Plan compliance",
               delta: compareLatest(recentDiscipline.map((d) => d.planCompliance)),
-              format: formatPercent,
+              format: "percent",
               goodWhen: "higher",
             },
             {
               label: "Mistake rate",
               delta: compareLatest(recentDiscipline.map((d) => d.mistakeRate)),
-              format: formatPercent,
+              format: "percent",
               goodWhen: "lower",
             },
           ]}
