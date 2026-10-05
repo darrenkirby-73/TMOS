@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/toast";
 import { defaultChecklist, resetChecklist } from "@/lib/checklist";
 import type { ChecklistItem, DayRecord, Tag } from "@/lib/types";
 import { saveMorningCheckin } from "./actions";
+import { RISK_RULES, RISK_RULE_TEXT } from "@/lib/risk-rules";
 
 export function MorningForm({
   date,
@@ -96,25 +97,25 @@ export function MorningForm({
 
       <section className="card grid gap-4 p-6 sm:grid-cols-3">
         <SectionHeading>Risk plan</SectionHeading>
-        <Field label="Planned risk per trade (%)" hint="0.25–0.50 guideline">
+        <Field label="Planned risk per trade (%)" hint={`${RISK_RULE_TEXT.perTrade} guideline`}>
           <input
             name="planned_risk_per_trade"
             type="number"
             step="0.05"
             min="0"
             required
-            defaultValue={record?.planned_risk_per_trade ?? 0.25}
+            defaultValue={record?.planned_risk_per_trade ?? RISK_RULES.perTradePercent}
             className={inputClass}
           />
         </Field>
-        <Field label="Max daily risk (%)" hint="1.0 guideline">
+        <Field label="Max daily risk (%)" hint={`${RISK_RULE_TEXT.maxNewDaily} guideline`}>
           <input
             name="max_daily_risk"
             type="number"
             step="0.05"
             min="0"
             required
-            defaultValue={record?.max_daily_risk ?? 1.0}
+            defaultValue={record?.max_daily_risk ?? RISK_RULES.maxNewDailyRiskPercent}
             className={inputClass}
           />
         </Field>

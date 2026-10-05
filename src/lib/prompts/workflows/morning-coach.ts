@@ -1,3 +1,4 @@
+import { RISK_RULE_TEXT } from "@/lib/risk-rules";
 import type { WorkflowDefinition } from "./types";
 
 export const morningCoach: WorkflowDefinition = {
@@ -12,14 +13,14 @@ export const morningCoach: WorkflowDefinition = {
       name: "planned_risk_per_trade",
       label: "Planned risk per trade (%)",
       type: "number",
-      hint: "your rule: 0.25–0.50",
+      hint: `your rule: ${RISK_RULE_TEXT.perTrade}`,
       required: true,
     },
     {
       name: "max_daily_risk",
       label: "Max daily risk (%)",
       type: "number",
-      hint: "your rule: up to 1.0",
+      hint: `your rule: up to ${RISK_RULE_TEXT.maxNewDaily}`,
       required: true,
     },
     {
@@ -47,7 +48,7 @@ export const morningCoach: WorkflowDefinition = {
 
 1. **Readiness** — one or two sentences on the trader's state, grounded in the stress and energy scores and anything they told you. Say plainly whether their state supports disciplined execution today.
 
-2. **Risk warnings** — check the stated per-trade risk and max daily risk against the trader's own rules (0.25–0.50% per trade, max 1.0% total open risk, 0.5–1.0% new daily risk). Flag any number outside those bands and say what the correct figure would be. If the numbers are within the rules, say so in one line and move on.
+2. **Risk warnings** — check the stated per-trade risk and max daily risk against the trader's own rules (${RISK_RULE_TEXT.summary}). Flag any number outside those bands and say what the correct figure would be. If the numbers are within the rules, say so in one line and move on.
 
 3. **Trade or stand aside** — a clear recommendation to trade normally, trade reduced size, or stand aside. Base this ONLY on the trader's own no-trade filters (poor mental state is one of them) and the state data they gave you. This is a judgement about the trader's readiness, never about the market.
 

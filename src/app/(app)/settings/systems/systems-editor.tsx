@@ -13,6 +13,7 @@ import {
   type TradingSystem,
 } from "@/lib/types";
 import { deleteSystem, saveSystem, type SystemInput } from "../actions";
+import { RISK_RULE_TEXT } from "@/lib/risk-rules";
 
 /** Per-system numbers, computed on the server from closed trades. */
 export type SystemStats = {
@@ -44,7 +45,7 @@ const RULE_FIELDS: {
   {
     name: "position_sizing",
     label: "Position sizing",
-    hint: "How size is derived from account risk. 0.25–0.50% per trade.",
+    hint: `How size is derived from account risk. ${RISK_RULE_TEXT.perTrade} per trade.`,
   },
   {
     name: "edge_rationale",

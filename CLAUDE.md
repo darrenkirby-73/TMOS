@@ -19,7 +19,9 @@ missing.
 - Think in 1R and R-multiples; every trade has clearly defined initial risk
 - Track expectancy, not just win rate
 - Separate valid losses from mistakes
-- Position sizing is explicit and reviewable (0.25–0.50% risk per trade)
+- Position sizing is explicit and reviewable; limits live in
+  `src/lib/risk-rules.ts` (1% per trade, 3% max open, 2% max new daily) and
+  must never be restated as literals elsewhere
 - Process over outcome; capital preservation first
 
 ## Tech stack

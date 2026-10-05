@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { composePrompt, renderForPaste, WORKFLOW_LIST, WORKFLOWS } from "./index";
 import { mockResponse } from "./mock";
 import type { DayRecord, Trade } from "@/lib/types";
+import { IMPLIED_POSITIONS, RISK_RULES, RISK_RULE_TEXT } from "@/lib/risk-rules";
 
 const emptyDay: DayRecord = {
   id: "d",
@@ -253,5 +254,29 @@ describe("renderForPaste", () => {
     const text = renderForPaste(composePrompt("evening_debrief", {}, {}));
     expect(text).toContain("NO RECORD");
     expect(text).toContain("do not fill it in");
+  });
+});
+
+describe("risk limits come from one place", () => {
+  it("states the current rule, not a stale literal", () => {
+    // The 0.25–0.50% band was repeated across eight files and went stale the
+    // moment the rule changed. Any prompt quoting a limit must read it from
+    // RISK_RULES, so this fails if a literal creeps back in.
+    const prompts = [
+      WORKFLOWS.morning_coach.taskPrompt,
+      WORKFLOWS.pre_trade_review.taskPrompt,
+    ].join("\n");
+    expect(prompts).toContain(RISK_RULE_TEXT.perTrade);
+    expect(prompts).not.toContain("0.25");
+    expect(prompts).not.toContain("0.50");
+  });
+
+  it("keeps the limits mutually coherent", () => {
+    // A per-trade limit above the open-risk cap would reject its own guidance.
+    expect(RISK_RULES.maxOpenRiskPercent).toBeGreaterThan(RISK_RULES.perTradePercent);
+    expect(RISK_RULES.maxNewDailyRiskPercent).toBeGreaterThan(RISK_RULES.perTradePercent);
+    expect(RISK_RULES.maxNewDailyRiskPercent).toBeLessThanOrEqual(RISK_RULES.maxOpenRiskPercent);
+    expect(IMPLIED_POSITIONS.concurrent).toBeGreaterThanOrEqual(2);
+    expect(IMPLIED_POSITIONS.perDay).toBeGreaterThanOrEqual(1);
   });
 });
