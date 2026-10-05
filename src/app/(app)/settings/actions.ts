@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isValidIsoDate } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import type { SystemStatus, TagCategory } from "@/lib/types";
 
@@ -228,4 +229,110 @@ export async function deleteSystem(id: string): Promise<ActionResult> {
 
   revalidatePath("/settings/systems");
   return { ok: true, message: "System definition deleted" };
+}
+
+// ---------------------------------------------------------------------------
+// Account equity and risk limits — the inputs position sizing depends on.
+// ---------------------------------------------------------------------------
+
+export async function saveEquity(input: {
+  id?: string;
+  asOfDate: string;
+  amount: number;
+  note: string;
+}): Promise<ActionResult> {
+  if (!isValidIsoDate(input.asOfDate))
+    return { ok: false, error: "Enter a valid date" };
+  if (!Number.isFinite(input.amount) || input.amount <= 0)
+    return { ok: false, error: "Equity must be a positive amount" };
+
+  const { supabase, user } = await requireUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+
+  const row = {
+    as_of_date: input.asOfDate,
+    amount: input.amount,
+    note: blankToNull(input.note),
+  };
+
+  const { error } = input.id
+    ? await supabase.from("account_equity").update(row).eq("id", input.id)
+    : await supabase.from("account_equity").insert(row);
+
+  if (error) {
+    if (error.code === "23505")
+      return {
+        ok: false,
+        error: `There is already an equity entry for ${input.asOfDate}. Edit that one instead.`,
+      };
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/settings");
+  revalidatePath("/sizing");
+  return { ok: true, message: "Equity saved" };
+}
+
+export async function deleteEquity(id: string): Promise<ActionResult> {
+  const { supabase, user } = await requireUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+
+  const { error } = await supabase.from("account_equity").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/settings");
+  revalidatePath("/sizing");
+  return { ok: true, message: "Equity entry removed" };
+}
+
+/**
+ * Risk limits are stored per user and must stay mutually coherent — a
+ * per-trade limit above the open cap would reject its own guidance. The
+ * database enforces this too; checking here produces a readable message
+ * instead of a constraint violation.
+ */
+export async function saveRiskSettings(input: {
+  perTradePercent: number;
+  maxOpenRiskPercent: number;
+  maxNewDailyRiskPercent: number;
+}): Promise<ActionResult> {
+  const values = [
+    { label: "Risk per trade", value: input.perTradePercent },
+    { label: "Max open risk", value: input.maxOpenRiskPercent },
+    { label: "Max new daily risk", value: input.maxNewDailyRiskPercent },
+  ];
+  for (const { label, value } of values) {
+    if (!Number.isFinite(value) || value <= 0 || value > 100)
+      return { ok: false, error: `${label} must be between 0 and 100` };
+  }
+  if (input.maxOpenRiskPercent < input.perTradePercent)
+    return {
+      ok: false,
+      error:
+        "Max open risk cannot be below the per-trade risk — one position would exceed the cap on its own",
+    };
+  if (input.maxNewDailyRiskPercent < input.perTradePercent)
+    return {
+      ok: false,
+      error:
+        "Max new daily risk cannot be below the per-trade risk — you could not open a single trade",
+    };
+
+  const { supabase, user } = await requireUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+
+  const { error } = await supabase.from("risk_settings").upsert(
+    {
+      user_id: user.id,
+      per_trade_percent: input.perTradePercent,
+      max_open_risk_percent: input.maxOpenRiskPercent,
+      max_new_daily_risk_percent: input.maxNewDailyRiskPercent,
+    },
+    { onConflict: "user_id" },
+  );
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/settings");
+  revalidatePath("/sizing");
+  return { ok: true, message: "Risk limits saved" };
 }

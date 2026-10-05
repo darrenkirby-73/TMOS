@@ -113,6 +113,7 @@ instructions, and a per-feature acceptance checklist.
 | **Trades** | Sortable, filterable trade log; modal entry form with live suggested R; screenshot upload |
 | **Morning** | Risk limits, stress/energy, attitude focus, editable discipline checklist, decision sequence |
 | **Evening** | Debrief with numbers pre-filled from that day's trades, all overridable |
+| **Sizing** | Position size from equity, risk %, entry and stop; shares or FX; limit checks against open and daily risk |
 | **Reports** | Win rate, average R winner/loser, expectancy, cumulative R, R per trade, rolling 20-trade expectancy, performance by setup/system/trade type |
 | **Weekly** | Week picker, summary cards, stress and mistake charts, decision-quality distribution, weekly reflection |
 | **Coach** | Five coaching workflows over your own records, answered by API / paste-through / mock, with a reviewable session history |
@@ -146,6 +147,8 @@ src/
     ui/                 # Toast, dialog, form fields, button, empty state
   lib/
     r.ts                # R-multiple maths (suggestions only)
+    sizing.ts           # Position sizing, limit checks, equity-as-of
+    risk-rules.ts       # The risk limits, in one place
     stats.ts            # Win rate, expectancy, rolling windows, grouping
     weekly.ts           # Weekly aggregation
     day-suggestions.ts  # Evening check-in suggestions from the trade log
