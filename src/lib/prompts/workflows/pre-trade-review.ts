@@ -1,3 +1,4 @@
+import { RISK_RULE_TEXT } from "@/lib/risk-rules";
 import type { WorkflowDefinition } from "./types";
 
 export const preTradeReview: WorkflowDefinition = {
@@ -54,14 +55,14 @@ Compute and show:
 State every calculation explicitly so the trader can check it.
 
 Then give a verdict of exactly one of: **VALID**, **INVALID**, or **NEEDS CLARIFICATION**.
-- INVALID if a no-trade filter is tripped (earnings within 5 trading days, risk outside 0.25–0.50% of account, poor mental state) or the stop is on the wrong side of the entry.
+- INVALID if a no-trade filter is tripped (earnings within 5 trading days, risk above ${RISK_RULE_TEXT.perTrade} of account, poor mental state) or the stop is on the wrong side of the entry.
 - NEEDS CLARIFICATION if the trend filter was not confirmed, earnings were not checked, or the 3R path cannot be assessed because no resistance area was given. Do not guess these.
 - VALID only if every one of the trader's stated criteria is satisfied by the information provided.
 
 Then list:
 - **Reasons** — why you reached that verdict, referencing the specific rule.
 - **Missing data checklist** — every input you needed and did not get. If the trend filter or earnings were "not checked", they go here. Ask the trader to confirm them manually.
-- **Position sizing guidance** — the sizing maths above, plus a note if the intended £ risk is outside 0.25–0.50% of the account.
+- **Position sizing guidance** — the sizing maths above, plus a note if the intended £ risk is above ${RISK_RULE_TEXT.perTrade} of the account.
 - **Reminders** — the 3R rule and any no-trade filter relevant to this idea.
 
 Never say whether you think the trade will work.`,

@@ -61,9 +61,9 @@ A daily swing trend-following pullback system for liquid US large-cap stocks and
    - below reversal bar low or recent swing low
 6. Only trade if there is plausible 3R upside before major resistance
 7. Position sizing:
-   - risk 0.25% to 0.50% of account equity per trade
-   - max open risk 1.0%
-   - max new daily risk 0.5% to 1.0%
+   - risk 1.0% of account equity per trade
+   - max open risk 3.0% (three concurrent positions)
+   - max new daily risk 2.0% (two new positions per day)
 8. No-trade filters:
    - earnings within 5 trading days
    - illiquid names

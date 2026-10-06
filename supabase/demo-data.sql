@@ -85,7 +85,9 @@ begin
         morning_completed_at
       ) values (
         demo_user, d, false,
-        0.25, 1.0, 2,
+        -- planned risk per trade, max daily risk, max trades: matches
+        -- RISK_RULES in src/lib/risk-rules.ts
+        1.0, 2.0, 2,
         2 + (random() * 5)::int,
         5 + (random() * 4)::int,
         random() > 0.15,
