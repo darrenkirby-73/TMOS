@@ -52,9 +52,9 @@ export default async function SettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="mt-1 text-sm text-muted">
-          The vocabulary the app offers you. Everything here started as a
-          placeholder — none of it is authoritative, and it&apos;s meant to
-          become yours.{" "}
+          Your account equity, your risk limits, and the vocabulary the app
+          offers you. The lists started as placeholders — none of them is
+          authoritative, and they&apos;re meant to become yours.{" "}
           <Link
             href="/settings/systems"
             className="text-accent hover:underline"
